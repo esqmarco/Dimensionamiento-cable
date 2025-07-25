@@ -112,7 +112,7 @@ function calcularFatorTemperatura(parametros) {
         const esEnterrado = metodosEnterrados.includes(metodo);
         
         // Obtener factor de temperatura usando función auxiliar
-        const factor = obtenerFactorTemperatura(material, temperatura, esEnterrado);
+        const factor = obtenerFactorTemperatura(material, temperatura, metodo, esEnterrado);
         
         if (factor === 0) {
             throw new Error(`Temperatura ${temperatura}°C excede límite para material ${material}`);
