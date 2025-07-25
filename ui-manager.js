@@ -49,7 +49,7 @@ function switchTab(tabName) {
         }
 
         // Activar el botón de la pestaña
-        const selectedButton = document.querySelector(`[onclick="switchTab('${tabName}')"]`);
+        const selectedButton = document.querySelector(`.tab[data-tab="${tabName}"]`);
         if (selectedButton) {
             selectedButton.classList.add('active');
         }
@@ -77,7 +77,7 @@ function actualizarIndicadoresPestanas() {
         const pestanas = ['proyecto', 'caida-tension', 'cortocircuito', 'resultados'];
         
         pestanas.forEach(pestana => {
-            const botonPestana = document.querySelector(`[onclick="switchTab('${pestana}')"]`);
+            const botonPestana = document.querySelector(`.tab[data-tab="${pestana}"]`);
             if (!botonPestana) return;
 
             // Remover clases de estado previas
@@ -666,4 +666,20 @@ window.actualizarElementoResultado = actualizarElementoResultado;
 window.toggleElementos = toggleElementos;
 window.toggleElemento = toggleElemento;
 window.obtenerDatosFormularios = obtenerDatosFormularios;
+
+// Inicializar manejadores de pestañas al cargar la página
+document.addEventListener('DOMContentLoaded', () => {
+    const tabButtons = document.querySelectorAll('.tabs-container .tab');
+    tabButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tabName = btn.dataset.tab;
+            if (tabName) {
+                switchTab(tabName);
+            }
+        });
+    });
+
+    // Mostrar la pestaña inicial
+    switchTab(appState.pestanaActiva);
+});
 
