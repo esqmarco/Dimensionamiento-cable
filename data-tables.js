@@ -466,7 +466,7 @@ function obtenerAmpacidadBase(material, metodo, seccion) {
 /**
  * Obtiene el factor de temperatura apropiado
  */
-function obtenerFactorTemperatura(material, temperatura, esEnterrado = false) {
+function obtenerFactorTemperatura(material, temperatura, metodo, esEnterrado = false) {
     let claveMaterial = material;
     
     // Mapear material a clave de factor de temperatura
