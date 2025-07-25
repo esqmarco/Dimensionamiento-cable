@@ -608,7 +608,10 @@ function obtenerDatosFormularios() {
 
         // Obtener datos de caída de tensión
         const camposCaida = [
-            'longitud-circuito', 'material-condutor', 'secao-cabo', 'resistencia-condutor'
+            // IDs existentes en el formulario de Caída de Tensión
+            'longitud-cabo',
+            'material-condutor',
+            'secao-cabo'
         ];
 
         camposCaida.forEach(campo => {
@@ -620,7 +623,11 @@ function obtenerDatosFormularios() {
 
         // Obtener datos de cortocircuito
         const camposCorto = [
-            'corriente-cortocircuito', 'tempo-atuacao', 'material-condutor-cc', 'secao-cabo-cc'
+            'corriente-cortocircuito',
+            'tempo-atuacao',
+            // Usamos los mismos campos de sección y material que en el resto de formularios
+            'material-condutor',
+            'secao-cabo'
         ];
 
         camposCorto.forEach(campo => {
