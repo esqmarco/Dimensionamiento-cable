@@ -444,6 +444,40 @@ const tabelasNBR = {
 };
 
 // ===================================================================
+// FACTORES ESPECIALES - RESISTIVIDAD TÉRMICA Y PROFUNDIDAD
+// ===================================================================
+
+const fatoresEspeciais = {
+    // RESISTIVIDAD TÉRMICA INPACO
+    resistividade_termica_INPACO: {
+        tierra_muy_humeda: {resistividad: 0.5, factor_electroductos: 1.08, factor_directo: 1.25},
+        tierra_humeda: {resistividad: 0.8, factor_electroductos: 1.02, factor_directo: 1.08},
+        tierra_seca_normal: {resistividad: 1.0, factor_electroductos: 1.00, factor_directo: 1.00},
+        tierra_muy_seca: {resistividad: 1.5, factor_electroductos: 0.93, factor_directo: 0.85},
+        tierra_arena_70_30: {resistividad: 2.0, factor_electroductos: 0.89, factor_directo: 0.75},
+        arena_tierra_70_30: {resistividad: 2.5, factor_electroductos: 0.85, factor_directo: 0.67},
+        arena_muy_seca: {resistividad: 3.0, factor_electroductos: 0.81, factor_directo: 0.60}
+    },
+
+    // RESISTIVIDAD TÉRMICA NBR
+    resistividade_termica_NBR: {
+        1.0: 1.18, 1.5: 1.10, 2.0: 1.05, 2.5: 1.00, 3.0: 0.96
+    },
+
+    // PROFUNDIDAD INPACO
+    profundidade_INPACO: {
+        0.40: 1.03, 0.50: 1.02, 0.60: 1.01, 0.70: 1.00, 0.80: 0.99,
+        0.90: 0.98, 1.00: 0.97, 1.20: 0.95
+    },
+
+    // PROFUNDIDAD NBR
+    profundidade_NBR: {
+        0.30: 1.05, 0.40: 1.03, 0.50: 1.02, 0.60: 1.01, 0.70: 1.00,
+        0.80: 0.99, 0.90: 0.98, 1.00: 0.97, 1.20: 0.95, 1.50: 0.93
+    }
+};
+
+// ===================================================================
 // FUNCIONES AUXILIARES PARA ACCESO A DATOS
 // ===================================================================
 
@@ -539,6 +573,7 @@ function obtenerResistencia(material, seccion) {
 // Hacer las variables disponibles globalmente
 window.tabelasNBR = tabelasNBR;
 window.metodosInstalacion = metodosInstalacion;
+window.fatoresEspeciais = fatoresEspeciais;
 window.obtenerAmpacidadBase = obtenerAmpacidadBase;
 window.obtenerFactorTemperatura = obtenerFactorTemperatura;
 window.obtenerFactorAgrupamento = obtenerFactorAgrupamento;
