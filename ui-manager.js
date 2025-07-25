@@ -638,6 +638,226 @@ function obtenerDatosFormularios() {
     }
 }
 
+// ===================================================================
+// MANEJO DE BOTONES DE CÁLCULO
+// ===================================================================
+
+function handleCalcularProyecto() {
+    try {
+        limpiarMensajes();
+
+        const potencia = parseFloat(document.getElementById('potencia').value);
+        const unidadPotencia = document.getElementById('unidad-potencia').value;
+        const potenciaW = convertirPotencia(potencia, unidadPotencia, 'W');
+        const tension = parseFloat(document.getElementById('tension').value);
+        const factorPotencia = parseFloat(document.getElementById('factor-potencia').value);
+        const tipoSistema = document.getElementById('tipo-sistema').value;
+        const rendimiento = parseFloat(document.getElementById('rendimiento').value);
+        const material = document.getElementById('material-isolamento').value;
+        const metodo = document.getElementById('metodo-instalacao').value;
+        const temperatura = parseFloat(document.getElementById('temperatura-ambiente').value);
+        const numeroCircuitos = parseInt(document.getElementById('numero-circuitos').value);
+
+        const validacion = validarParametrosBasicos({
+            potencia: potenciaW,
+            tension,
+            factorPotencia,
+            tipoSistema,
+            material,
+            metodo,
+            temperatura,
+            numeroCircuitos,
+            rendimiento
+        });
+
+        if (!validacion.valido) {
+            mostrarError(formatearErrores(validacion.errores, validacion.advertencias));
+            return;
+        }
+
+        const corrienteProyecto = calcularCorrenteProyeto({
+            potencia: potenciaW,
+            tension,
+            factorPotencia,
+            tipoSistema,
+            rendimiento
+        });
+
+        const factorTemp = calcularFatorTemperatura({
+            material,
+            temperatura,
+            metodo
+        });
+
+        const factorAgr = calcularFatorAgrupamento(metodo, numeroCircuitos);
+
+        const corrienteCorrigida = calcularCorrenteCorregida({
+            corrienteProyeto: corrienteProyecto,
+            factorTemperatura: factorTemp,
+            factorAgrupamento: factorAgr
+        });
+
+        const seccionMinima = seleccionarSeccionMinima({
+            corrienteCorregida: corrienteCorrigida,
+            material,
+            metodo
+        });
+
+        actualizarElementoResultado('resultado-corriente-projeto', corrienteProyecto, 'A');
+        actualizarElementoResultado('resultado-factor-temperatura', factorTemp);
+        actualizarElementoResultado('resultado-factor-agrupamento', factorAgr);
+        actualizarElementoResultado('resultado-corriente-corregida', corrienteCorrigida, 'A');
+        actualizarElementoResultado('resultado-seccion-minima', seccionMinima.seccion, 'mm²');
+        actualizarElementoResultado('resultado-ampacidad', seccionMinima.ampacidad, 'A');
+
+        appState.calculos['proyecto'] = {
+            corrienteProyecto,
+            factorTemp,
+            factorAgr,
+            corrienteCorrigida,
+            seccionMinima
+        };
+
+        marcarCalculoActualizado('proyecto');
+        mostrarExito('Proyecto calculado');
+    } catch (error) {
+        mostrarError(error.message);
+    }
+}
+
+function handleCalcularCaida() {
+    try {
+        limpiarMensajes();
+
+        const corriente = parseFloat(document.getElementById('corriente-caida').value);
+        const longitud = parseFloat(document.getElementById('longitud-cabo').value);
+        const seccion = parseFloat(document.getElementById('secao-cabo').value);
+        const materialCondutor = document.getElementById('material-condutor').value;
+        const tension = parseFloat(document.getElementById('tension').value);
+        const factorPotencia = parseFloat(document.getElementById('factor-potencia').value);
+        const tipoSistema = document.getElementById('tipo-sistema').value;
+
+        const resultados = verificarCaidaTension({
+            corriente,
+            longitud,
+            seccion,
+            tension,
+            materialCondutor,
+            factorPotencia,
+            tipoSistema
+        });
+
+        actualizarElementoResultado('resultado-caida-tension', resultados.caidaTension, 'V');
+        actualizarElementoResultado('resultado-porcentaje-caida', resultados.porcentajeCaida, '%');
+        actualizarElementoResultado('resultado-limite-caida', resultados.limite, '%');
+        actualizarElementoResultado('resultado-cumple-caida', resultados.cumpleCriterio ? 'Sí' : 'No');
+
+        appState.calculos['caida-tension'] = resultados;
+        marcarCalculoActualizado('caida-tension');
+        mostrarExito('Cálculo de caída realizado');
+    } catch (error) {
+        mostrarError(error.message);
+    }
+}
+
+function handleCalcularCortocircuito() {
+    try {
+        limpiarMensajes();
+
+        const corrienteCortocircuito = parseFloat(document.getElementById('corriente-cortocircuito').value);
+        const tiempoAtuacao = parseFloat(document.getElementById('tempo-atuacao').value);
+        const seccion = parseFloat(document.getElementById('secao-cabo').value);
+        const materialCondutor = document.getElementById('material-condutor').value;
+
+        const resultados = verificarCortocircuito({
+            corrienteCortocircuito,
+            seccion,
+            tiempoAtuacao,
+            materialCondutor
+        });
+
+        actualizarElementoResultado('resultado-seccion-minima-cc', resultados.seccionMinima, 'mm²');
+        actualizarElementoResultado('resultado-seccion-escolhida-cc', resultados.seccionEscolhida, 'mm²');
+        actualizarElementoResultado('resultado-cumple-cc', resultados.cumpleCriterio ? 'Sí' : 'No');
+
+        appState.calculos['cortocircuito'] = resultados;
+        marcarCalculoActualizado('cortocircuito');
+        mostrarExito('Cálculo de cortocircuito realizado');
+    } catch (error) {
+        mostrarError(error.message);
+    }
+}
+
+function handleDimensionarCompleto() {
+    try {
+        limpiarMensajes();
+
+        const potencia = parseFloat(document.getElementById('potencia').value);
+        const unidadPotencia = document.getElementById('unidad-potencia').value;
+        const potenciaW = convertirPotencia(potencia, unidadPotencia, 'W');
+        const tension = parseFloat(document.getElementById('tension').value);
+        const factorPotencia = parseFloat(document.getElementById('factor-potencia').value);
+        const tipoSistema = document.getElementById('tipo-sistema').value;
+        const rendimiento = parseFloat(document.getElementById('rendimiento').value);
+        const material = document.getElementById('material-isolamento').value;
+        const metodo = document.getElementById('metodo-instalacao').value;
+        const temperatura = parseFloat(document.getElementById('temperatura-ambiente').value);
+        const numeroCircuitos = parseInt(document.getElementById('numero-circuitos').value);
+        const longitud = parseFloat(document.getElementById('longitud-cabo').value);
+        const materialCondutor = document.getElementById('material-condutor').value;
+        const corrienteCortocircuito = parseFloat(document.getElementById('corriente-cortocircuito').value);
+        const tiempoAtuacao = parseFloat(document.getElementById('tempo-atuacao').value);
+
+        const resultados = dimensionarCondutor({
+            potencia: potenciaW,
+            tension,
+            factorPotencia,
+            tipoSistema,
+            rendimiento,
+            material,
+            metodo,
+            temperatura,
+            numeroCircuitos,
+            longitud,
+            materialCondutor,
+            corrienteCortocircuito,
+            tiempoAtuacao
+        });
+
+        let html = `
+            <p><strong>Corriente de Proyecto:</strong> ${resultados.corrienteProyeto} A</p>
+            <p><strong>Corriente Corregida:</strong> ${resultados.corrienteCorregida} A</p>
+            <p><strong>Sección Mínima:</strong> ${resultados.seccionMinima.seccion} mm²</p>
+            <p><strong>Ampacidad:</strong> ${resultados.seccionMinima.ampacidad} A</p>
+        `;
+
+        if (resultados.caidaTension) {
+            html += `<p><strong>Caída de Tensión:</strong> ${resultados.caidaTension.caidaTension} V (${resultados.caidaTension.porcentajeCaida}% - límite ${resultados.caidaTension.limite}%)</p>`;
+        }
+
+        if (resultados.cortocircuito) {
+            html += `<p><strong>Cortocircuito:</strong> Sección mínima ${resultados.cortocircuito.seccionMinima} mm² - ${resultados.cortocircuito.cumpleCriterio ? 'Cumple' : 'No cumple'}</p>`;
+        }
+
+        const contResumen = document.getElementById('contenido-resumen');
+        if (contResumen) {
+            contResumen.innerHTML = html;
+        }
+
+        const resumenFinal = document.getElementById('resumen-final');
+        if (resumenFinal) {
+            resumenFinal.classList.remove('hidden');
+        }
+
+        appState.calculos['resultados'] = resultados;
+        marcarCalculoActualizado('resultados');
+        mostrarExito('Dimensionamiento completo realizado');
+        switchTab('resultados');
+    } catch (error) {
+        mostrarError(error.message);
+    }
+}
+
 
 // ===================================================================
 // EXPORTAR FUNCIONES Y VARIABLES GLOBALES
@@ -678,6 +898,26 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+
+    const btnProyecto = document.getElementById('btn-calcular-projeto');
+    if (btnProyecto) {
+        btnProyecto.addEventListener('click', handleCalcularProyecto);
+    }
+
+    const btnCaida = document.getElementById('btn-calcular-caida');
+    if (btnCaida) {
+        btnCaida.addEventListener('click', handleCalcularCaida);
+    }
+
+    const btnCorto = document.getElementById('btn-calcular-cortocircuito');
+    if (btnCorto) {
+        btnCorto.addEventListener('click', handleCalcularCortocircuito);
+    }
+
+    const btnCompleto = document.getElementById('btn-dimensionar-completo');
+    if (btnCompleto) {
+        btnCompleto.addEventListener('click', handleDimensionarCompleto);
+    }
 
     // Mostrar la pestaña inicial
     switchTab(appState.pestanaActiva);
